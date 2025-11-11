@@ -65,3 +65,30 @@ CREATE POLICY "Anyone can insert contributions" ON contributions
 
 -- Enable realtime for contributions table
 ALTER PUBLICATION supabase_realtime ADD TABLE contributions;
+
+-- Function to get user's rooms with contribution counts
+CREATE OR REPLACE FUNCTION get_user_rooms_with_counts()
+RETURNS TABLE (
+  id UUID,
+  code VARCHAR,
+  config JSONB,
+  creator_user_id UUID,
+  created_at TIMESTAMP WITH TIME ZONE,
+  contribution_count BIGINT
+)
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT
+    r.id,
+    r.code,
+    r.config,
+    r.creator_user_id,
+    r.created_at,
+    COALESCE(COUNT(c.id), 0) as contribution_count
+  FROM rooms r
+  LEFT JOIN contributions c ON r.id = c.room_id
+  WHERE r.creator_user_id = auth.uid()
+  GROUP BY r.id
+  ORDER BY DATE(r.created_at) DESC, contribution_count DESC;
+$$;

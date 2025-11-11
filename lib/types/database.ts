@@ -66,3 +66,7 @@ export interface RoomConfig {
 export interface ContributionData {
   color: string
 }
+
+export interface RoomWithCount extends Database['public']['Tables']['rooms']['Row'] {
+  contribution_count: number
+}
