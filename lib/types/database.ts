@@ -67,6 +67,11 @@ export interface ContributionData {
   color: string
 }
 
-export interface RoomWithCount extends Database['public']['Tables']['rooms']['Row'] {
+export interface RoomWithCount {
+  id: string
+  code: string
+  config: Json
+  creator_user_id: string
+  created_at: string
   contribution_count: number
 }
