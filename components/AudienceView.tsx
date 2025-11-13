@@ -131,7 +131,7 @@ export default function AudienceView({ room, identifier }: AudienceViewProps) {
                   <Dialog.Overlay className="fixed inset-0 bg-black/50" />
                   <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
                     <Dialog.Title className="text-lg font-bold text-gray-800 mb-3">
-                      Question Details
+                      {currentQuestion.prompt}
                     </Dialog.Title>
                     <Dialog.Description className="text-sm text-gray-600 mb-4">
                       {currentQuestion.details}
