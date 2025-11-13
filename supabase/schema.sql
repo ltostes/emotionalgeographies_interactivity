@@ -98,6 +98,8 @@ CREATE OR REPLACE FUNCTION get_room_image_stats(p_room_id UUID)
 RETURNS TABLE (
   image_id TEXT,
   contribution_count BIGINT,
+  valence_contribution_count BIGINT,
+  arousal_contribution_count BIGINT,
   mean_valence NUMERIC,
   mean_arousal NUMERIC
 )
@@ -106,7 +108,15 @@ STABLE
 AS $$
   SELECT
     (c.data->>'image_id')::TEXT as image_id,
-    COUNT(c.id) as contribution_count,
+    count(c.id) as contribution_count,
+    COUNT(CASE
+      WHEN c.data->>'question_id' = 'valence'
+      THEN 1
+    END) as valence_contribution_count,
+    COUNT(CASE
+      WHEN c.data->>'question_id' = 'arousal'
+      THEN 1
+    END) as arousal_contribution_count,
     AVG(CASE
       WHEN c.data->>'question_id' = 'valence'
       THEN (c.data->>'answer')::NUMERIC

@@ -111,6 +111,8 @@ export interface RoomWithCount {
 export interface ImageStats {
   image_id: string
   contribution_count: number
+  valence_contribution_count: number
+  arousal_contribution_count: number
   mean_valence: number | null
   mean_arousal: number | null
 }

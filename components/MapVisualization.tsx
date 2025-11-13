@@ -83,8 +83,7 @@ export default function MapVisualization({ config, imageStats }: MapVisualizatio
       // No contributions - grey placeholder
       return {
         radius: 4,
-        color: 'rgb(107, 114, 128)',
-        opacity: 0.3
+        color: 'rgb(107, 114, 128)'
       }
     }
 

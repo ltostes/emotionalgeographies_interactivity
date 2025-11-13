@@ -74,14 +74,14 @@ export default function PresenterView({ room }: PresenterViewProps) {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       {/* 4-Quadrant Grid Layout */}
-      <div className="h-screen grid grid-cols-[1fr_400px] grid-rows-[1fr_120px] gap-4 p-4">
+      <div className="h-screen grid grid-cols-[1fr_400px] grid-rows-[1fr_250px] gap-4 p-4">
         {/* Top-left: Map Visualization (largest area) */}
         <div className="bg-gray-900 rounded-lg overflow-hidden">
           <MapVisualization config={config} imageStats={imageStats} />
         </div>
 
         {/* Top-right: Valence/Arousal Scatter Plot */}
-        <div className="bg-gray-900 rounded-lg p-4 overflow-hidden">
+        <div className="bg-gray-900 rounded-lg p-4 overflow-hidden flex flex-col items-center justify-center">
           <ValenceArousalScatter imageStats={imageStats} />
         </div>
 
@@ -92,7 +92,6 @@ export default function PresenterView({ room }: PresenterViewProps) {
 
         {/* Bottom-right: QR Code */}
         <div className="bg-gray-900 rounded-lg p-4 flex flex-col items-center justify-center">
-          <h3 className="text-sm font-semibold text-gray-400 mb-3">Audience Access</h3>
           {audienceUrl ? (
             <>
               <div className="bg-white p-3 rounded-lg">
@@ -100,6 +99,9 @@ export default function PresenterView({ room }: PresenterViewProps) {
               </div>
               <p className="text-xs text-gray-500 mt-2 text-center">
                 {totalContributions} contribution{totalContributions !== 1 ? 's' : ''}
+              </p>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                {audienceUrl}
               </p>
             </>
           ) : (
