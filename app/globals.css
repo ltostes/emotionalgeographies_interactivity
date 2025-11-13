@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+/* MapLibre popup styling for dark theme */
+.maplibregl-popup-content {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.maplibregl-popup-tip {
+  display: none !important;
+}
+
+.maplibregl-popup-close-button {
+  display: none !important;
+}
