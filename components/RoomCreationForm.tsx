@@ -169,7 +169,7 @@ export default function RoomCreationForm({ userId }: RoomCreationFormProps) {
         .single()
 
       if (!insertError && data) {
-        router.push(`/${code}/presenter`)
+        router.push(`/${code}/presentation`)
         return
       }
 

@@ -28,10 +28,10 @@ export default function RoomCard({ room }: RoomCardProps) {
       </div>
 
       <Link
-        href={`/${room.code}/presenter`}
+        href={`/${room.code}/presentation`}
         className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors text-center"
       >
-        Open Presenter View
+        Open Presentation
       </Link>
     </div>
   )
