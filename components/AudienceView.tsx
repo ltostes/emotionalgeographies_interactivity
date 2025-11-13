@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { Database, RoomConfig } from '@/lib/types/database'
+import * as Dialog from '@radix-ui/react-dialog'
+import type { Database, RoomConfig, ImageData, Question } from '@/lib/types/database'
 
 type Room = Database['public']['Tables']['rooms']['Row']
 
@@ -12,18 +13,44 @@ interface AudienceViewProps {
 }
 
 export default function AudienceView({ room, identifier }: AudienceViewProps) {
-  const [selectedColor, setSelectedColor] = useState<string | null>(null)
+  const [currentImage, setCurrentImage] = useState<ImageData | null>(null)
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
+  const [answer, setAnswer] = useState<number | string>('')
   const [isSending, setIsSending] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
     null
   )
+  const [detailsOpen, setDetailsOpen] = useState(false)
 
   const supabase = createClient()
   const config = (room.config as unknown) as RoomConfig
-  const colors = config?.colors || []
 
-  const handleSend = async () => {
-    if (!selectedColor) return
+  // Pick random image and question
+  const pickNewContribution = () => {
+    if (!config?.images || !config?.questions) return
+
+    // Random image
+    const randomImage = config.images[Math.floor(Math.random() * config.images.length)]
+    setCurrentImage(randomImage)
+
+    // Pick question based on type
+    const questionConfig = config.questions
+    if (questionConfig.type === 'single-randomly-picked') {
+      const randomQuestion =
+        questionConfig.questions[Math.floor(Math.random() * questionConfig.questions.length)]
+      setCurrentQuestion(randomQuestion)
+    }
+    // TODO: implement 'series' and 'simultaneous' types
+
+    setAnswer('')
+  }
+
+  useEffect(() => {
+    pickNewContribution()
+  }, [])
+
+  const handleSubmit = async () => {
+    if (!currentImage || !currentQuestion || !answer) return
 
     setIsSending(true)
     setMessage(null)
@@ -31,97 +58,161 @@ export default function AudienceView({ room, identifier }: AudienceViewProps) {
     const { error } = await supabase.from('contributions').insert({
       room_id: room.id,
       identifier,
-      data: { color: selectedColor },
+      data: {
+        image_id: currentImage.image_id,
+        question_id: currentQuestion.id,
+        answer:
+          currentQuestion.type === 'range' ? Number(answer) : String(answer),
+      },
     })
 
     if (error) {
       console.error('Contribution error:', error)
       setMessage({
         type: 'error',
-        text: error.message || 'Failed to send. Please try again.'
+        text: error.message || 'Failed to send. Please try again.',
       })
       setIsSending(false)
     } else {
-      setMessage({ type: 'success', text: 'Sent successfully!' })
-      setSelectedColor(null)
+      setMessage({ type: 'success', text: 'Submitted successfully!' })
       setIsSending(false)
 
-      // Clear success message after 2 seconds
-      setTimeout(() => setMessage(null), 2000)
+      // Clear success message and load new contribution
+      setTimeout(() => {
+        setMessage(null)
+        pickNewContribution()
+      }, 1000)
     }
   }
 
+  if (!currentImage || !currentQuestion) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-4">
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    )
+  }
+
+  const isRange = currentQuestion.type === 'range'
+  const [minVal, maxVal] = isRange
+    ? (currentQuestion.implementation as [number, number])
+    : [0, 0]
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-50 to-pink-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Room {room.code}
-          </h1>
-          <p className="text-gray-600">Select a color and send your contribution</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex flex-col">
+      {/* Image Section - Top */}
+      <div className="flex-shrink-0 w-full flex items-center justify-center p-4">
+        <img
+          src={currentImage.url}
+          alt={`Image ${currentImage.image_id}`}
+          className="max-w-full max-h-[50vh] object-contain rounded-lg shadow-lg"
+          loading="lazy"
+        />
+      </div>
 
-        {/* Color Selection */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Choose Your Color
-          </label>
-          <div className="grid grid-cols-4 gap-3">
-            {colors.map((color) => (
-              <button
-                key={color}
-                type="button"
-                onClick={() => setSelectedColor(color)}
-                disabled={isSending}
-                className={`w-full aspect-square rounded-lg transition-all ${
-                  selectedColor === color
-                    ? 'ring-4 ring-purple-500 ring-offset-2 scale-105'
-                    : 'ring-2 ring-gray-200 hover:ring-purple-300'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-                style={{ backgroundColor: color }}
-                aria-label={`Select ${color}`}
-              />
-            ))}
+      {/* Question Section - Bottom */}
+      <div className="flex-1 flex items-start justify-center p-4 pt-0">
+        <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
+          <div className="mb-4">
+            <div className="flex items-start gap-2">
+              <h2 className="text-lg font-bold text-gray-800 flex-1">
+                {currentQuestion.prompt}
+              </h2>
+              <Dialog.Root open={detailsOpen} onOpenChange={setDetailsOpen}>
+                <Dialog.Trigger asChild>
+                  <button
+                    className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center hover:bg-blue-600 transition-colors"
+                    aria-label="More information"
+                  >
+                    i
+                  </button>
+                </Dialog.Trigger>
+                <Dialog.Portal>
+                  <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+                  <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+                    <Dialog.Title className="text-lg font-bold text-gray-800 mb-3">
+                      Question Details
+                    </Dialog.Title>
+                    <Dialog.Description className="text-sm text-gray-600 mb-4">
+                      {currentQuestion.details}
+                    </Dialog.Description>
+                    <Dialog.Close asChild>
+                      <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+                        Close
+                      </button>
+                    </Dialog.Close>
+                  </Dialog.Content>
+                </Dialog.Portal>
+              </Dialog.Root>
+            </div>
           </div>
-          {selectedColor && (
-            <p className="text-sm text-gray-600 mt-3 text-center">
-              Selected: {selectedColor}
-            </p>
-          )}
-        </div>
 
-        {/* Messages */}
-        {message && (
-          <div
-            className={`mb-4 p-3 rounded-md ${
-              message.type === 'success'
-                ? 'bg-green-50 border border-green-200'
-                : 'bg-red-50 border border-red-200'
-            }`}
-          >
-            <p
-              className={`text-sm ${
-                message.type === 'success' ? 'text-green-600' : 'text-red-600'
+          {/* Answer Input */}
+          <div className="mb-4">
+            {isRange ? (
+              <div className="space-y-3">
+                <input
+                  type="range"
+                  min={minVal}
+                  max={maxVal}
+                  value={answer || minVal}
+                  onChange={(e) => setAnswer(Number(e.target.value))}
+                  disabled={isSending}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600 disabled:opacity-50"
+                />
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>{minVal}</span>
+                  <span className="font-bold text-purple-600 text-lg">
+                    {answer || minVal}
+                  </span>
+                  <span>{maxVal}</span>
+                </div>
+              </div>
+            ) : (
+              <textarea
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                disabled={isSending}
+                className="w-full p-3 border border-gray-300 rounded-lg text-sm disabled:opacity-50"
+                rows={4}
+                placeholder="Type your answer..."
+              />
+            )}
+          </div>
+
+          {/* Messages */}
+          {message && (
+            <div
+              className={`mb-4 p-3 rounded-md ${
+                message.type === 'success'
+                  ? 'bg-green-50 border border-green-200'
+                  : 'bg-red-50 border border-red-200'
               }`}
             >
-              {message.text}
-            </p>
-          </div>
-        )}
+              <p
+                className={`text-sm ${
+                  message.type === 'success' ? 'text-green-600' : 'text-red-600'
+                }`}
+              >
+                {message.text}
+              </p>
+            </div>
+          )}
 
-        {/* Send Button */}
-        <button
-          onClick={handleSend}
-          disabled={!selectedColor || isSending}
-          className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors"
-        >
-          {isSending ? 'Sending...' : 'Send'}
-        </button>
+          {/* Submit Button */}
+          <button
+            onClick={handleSubmit}
+            disabled={!answer || isSending}
+            className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+          >
+            {isSending ? 'Submitting...' : 'Submit'}
+          </button>
 
-        {/* Identifier Info */}
-        <p className="text-xs text-gray-400 mt-6 text-center">
-          Your ID: {identifier.substring(0, 20)}...
-        </p>
+          {/* Identifier Info */}
+          <p className="text-xs text-gray-400 mt-4 text-center">
+            Room {room.code} • ID: {identifier.substring(0, 8)}...
+          </p>
+        </div>
       </div>
     </div>
   )

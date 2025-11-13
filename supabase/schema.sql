@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE rooms (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   code VARCHAR(10) UNIQUE NOT NULL,
-  config JSONB DEFAULT '{"colors": ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8"]}'::jsonb,
+  config JSONB DEFAULT '{}'::jsonb,
   creator_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -91,4 +91,34 @@ AS $$
   WHERE r.creator_user_id = auth.uid()
   GROUP BY r.id
   ORDER BY DATE(r.created_at) DESC, contribution_count DESC;
+$$;
+
+-- Function to get image statistics for a room
+CREATE OR REPLACE FUNCTION get_room_image_stats(p_room_id UUID)
+RETURNS TABLE (
+  image_id TEXT,
+  contribution_count BIGINT,
+  mean_valence NUMERIC,
+  mean_arousal NUMERIC
+)
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT
+    (c.data->>'image_id')::TEXT as image_id,
+    COUNT(c.id) as contribution_count,
+    AVG(CASE
+      WHEN c.data->>'question_id' = 'valence'
+      THEN (c.data->>'answer')::NUMERIC
+      ELSE NULL
+    END) as mean_valence,
+    AVG(CASE
+      WHEN c.data->>'question_id' = 'arousal'
+      THEN (c.data->>'answer')::NUMERIC
+      ELSE NULL
+    END) as mean_arousal
+  FROM contributions c
+  WHERE c.room_id = p_room_id
+  GROUP BY (c.data->>'image_id')
+  ORDER BY contribution_count DESC;
 $$;

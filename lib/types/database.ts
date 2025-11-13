@@ -59,12 +59,44 @@ export interface Database {
   }
 }
 
+export interface ImageData {
+  image_id: string
+  url: string
+  details: Record<string, unknown>
+}
+
+export interface RangeQuestion {
+  id: string
+  prompt: string
+  details: string
+  type: 'range'
+  implementation: [number, number] // [min, max]
+}
+
+export interface OpenQuestion {
+  id: string
+  prompt: string
+  details: string
+  type: 'open'
+  implementation: null
+}
+
+export type Question = RangeQuestion | OpenQuestion
+
+export interface QuestionConfig {
+  type: 'single-randomly-picked' | 'series' | 'simultaneous'
+  questions: Question[]
+}
+
 export interface RoomConfig {
-  colors: string[]
+  images: ImageData[]
+  questions: QuestionConfig
 }
 
 export interface ContributionData {
-  color: string
+  image_id: string
+  question_id: string
+  answer: number | string
 }
 
 export interface RoomWithCount {
@@ -74,4 +106,11 @@ export interface RoomWithCount {
   creator_user_id: string
   created_at: string
   contribution_count: number
+}
+
+export interface ImageStats {
+  image_id: string
+  contribution_count: number
+  mean_valence: number | null
+  mean_arousal: number | null
 }
