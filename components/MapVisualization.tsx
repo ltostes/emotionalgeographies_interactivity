@@ -18,11 +18,11 @@ interface PhotoLocation {
   latitude: number
   longitude: number
   url: string
-  standardValence?: number
-  standardArousal?: number
-  meanValence?: number
-  meanArousal?: number
-  contributionCount?: number
+  standardValence: any
+  standardArousal: any
+  meanValence: number | undefined
+  meanArousal: number | undefined
+  contributionCount: number
 }
 
 export default function MapVisualization({ config, imageStats }: MapVisualizationProps) {
@@ -49,7 +49,7 @@ export default function MapVisualization({ config, imageStats }: MapVisualizatio
       }
       return null
     })
-    .filter((loc): loc is PhotoLocation => loc !== null)
+    .filter((loc): loc is PhotoLocation => loc !== null) as PhotoLocation[]
 
   // Calculate bounds to fit all locations
   const bounds = photoLocations.reduce(

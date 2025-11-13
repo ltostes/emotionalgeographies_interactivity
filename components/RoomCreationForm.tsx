@@ -25,17 +25,25 @@ const ImageSchema = z.object({
   }),
 })
 
+const RangeQuestionSchema = z.object({
+  id: z.string(),
+  prompt: z.string(),
+  details: z.string(),
+  type: z.literal('range'),
+  implementation: z.tuple([z.number(), z.number()]),
+})
+
+const OpenQuestionSchema = z.object({
+  id: z.string(),
+  prompt: z.string(),
+  details: z.string(),
+  type: z.literal('open'),
+  implementation: z.preprocess((val) => (val === undefined ? null : val), z.null()),
+})
+
 const QuestionSchema = z.object({
   type: z.enum(['single-randomly-picked', 'series', 'simultaneous']),
-  questions: z.array(
-    z.object({
-      id: z.string(),
-      prompt: z.string(),
-      details: z.string(),
-      type: z.enum(['range', 'open']),
-      implementation: z.union([z.tuple([z.number(), z.number()]), z.null()]),
-    })
-  ),
+  questions: z.array(z.discriminatedUnion('type', [RangeQuestionSchema, OpenQuestionSchema])),
 })
 
 export default function RoomCreationForm({ userId }: RoomCreationFormProps) {
@@ -78,7 +86,7 @@ export default function RoomCreationForm({ userId }: RoomCreationFormProps) {
               // }
             } catch (err) {
               if (err instanceof z.ZodError) {
-                errors.push(`Row ${i + 1}: ${err.errors.map((e) => e.message).join(', ')}`)
+                errors.push(`Row ${i + 1}: ${err.issues.map((e) => e.message).join(', ')}`)
               }
             }
           }
@@ -107,7 +115,7 @@ export default function RoomCreationForm({ userId }: RoomCreationFormProps) {
       if (err instanceof z.ZodError) {
         return {
           valid: false,
-          errors: err.errors.map((e) => `${e.path.join('.')}: ${e.message}`),
+          errors: err.issues.map((e) => `${e.path.join('.')}: ${e.message}`),
         }
       }
       return { valid: false, errors: ['Invalid JSON format'] }
