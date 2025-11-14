@@ -30,7 +30,14 @@ const RangeQuestionSchema = z.object({
   prompt: z.string(),
   details: z.string(),
   type: z.literal('range'),
-  implementation: z.tuple([z.number(), z.number()]),
+  implementation: z.union([
+    z.tuple([z.number(), z.number()]),
+    z.object({
+      min: z.number(),
+      max: z.number(),
+      labels: z.record(z.string(), z.string()).optional(),
+    }),
+  ]),
 })
 
 const OpenQuestionSchema = z.object({
