@@ -3,75 +3,82 @@ import * as d3 from 'd3'
 import type { ImageStats } from '@/lib/types/database'
 import { valenceToColor, arousalToRadius  } from '@/lib/visualizations/scales'
 
+const emotions = [
+    // "Joy",
+    "Happy",
+    "Delighted",
+    "Excited",
+    // "Fully Aroused",
+    "Tense",
+    "Angry",
+    "Frustrated",
+    // "Fearful",
+    "Depressed",
+    "Bored",
+    "Tired",
+    // "Sleepy",
+    "Calm",
+    "Relaxed",
+    "Content"
+]
+
+const angleOffset : number = (Math.PI * 2) / emotions.length / 2;
+
+const emotionScale = d3
+    .scaleQuantize(emotions)
+    .domain([0, 2 * Math.PI])
+
+function angleToPoint(angle:number, radius:number) {
+    return d3.pointRadial(angle + Math.PI / 2, radius);
+}
+
+function pointToAngle(x:number, y:number) {
+    let angle = -(Math.atan2(x, y) + Math.PI / 2) + Math.PI;
+    angle = angle < 0 ? angle + 2 * Math.PI : angle;
+    return [angle, Math.hypot(x, y)];
+}
+const denormalizeFun = (n:number) => 3*n + 4;
+const normalizeFun = (n:number) => (n-4)/3;
+
+const emotionsCenterAngles = emotions.map((e) => d3.mean(emotionScale.invertExtent(e)))
+
+const emotionsCenterPoints = emotionsCenterAngles.map((d) => angleToPoint((d || 0), 1));
+
+const emotionsRangeAngles = emotionsCenterAngles.map((d) => [
+    (d || 0) - angleOffset,
+    (d || 0) + angleOffset
+])
+
+const emotionsRangePoints = emotionsRangeAngles.map((d) =>
+    d.map((a) => angleToPoint(a, 1))
+);
+
+export function calculateOverallEmotion(imageStats: ImageStats[]) : [number[], string] {
+
+    const overallPoint = [
+        d3.sum(imageStats, d => (d.mean_valence || 0) * d.valence_contribution_count) / d3.sum(imageStats, d => d.valence_contribution_count),
+        d3.sum(imageStats, d => (d.mean_arousal || 0) * d.arousal_contribution_count) / d3.sum(imageStats, d => d.arousal_contribution_count)
+    ]
+
+    const computedEmotion = emotionScale(pointToAngle(
+        normalizeFun(overallPoint[0]),
+        normalizeFun(overallPoint[1])
+    )[0]);
+
+    return [overallPoint, computedEmotion || ''];
+}
+
 export function generateScatterPlot(
     imageStats: ImageStats[],
     width: number,
     onDotClick?: (imageStats: ImageStats, event: MouseEvent) => void
 ) : [Element, string | null] {
 
-    
-    const overallPoint = [
-        d3.sum(imageStats, d => (d.mean_valence || 0) * d.valence_contribution_count) / d3.sum(imageStats, d => d.valence_contribution_count),
-        d3.sum(imageStats, d => (d.mean_arousal || 0) * d.arousal_contribution_count) / d3.sum(imageStats, d => d.arousal_contribution_count)
-    ]
-
-    const emotions = [
-        // "Joy",
-        "Happy",
-        "Delighted",
-        "Excited",
-        // "Fully Aroused",
-        "Tense",
-        "Angry",
-        "Frustrated",
-        // "Fearful",
-        "Depressed",
-        "Bored",
-        "Tired",
-        // "Sleepy",
-        "Calm",
-        "Relaxed",
-        "Content"
-    ]
-
-    const angleOffset : number = (Math.PI * 2) / emotions.length / 2;
-
-    const emotionScale = d3
-        .scaleQuantize(emotions)
-        .domain([0, 2 * Math.PI])
-
-    function angleToPoint(angle:number, radius:number) {
-        return d3.pointRadial(angle + Math.PI / 2, radius);
-    }
-
-    function pointToAngle(x:number, y:number) {
-        let angle = -(Math.atan2(x, y) + Math.PI / 2) + Math.PI;
-        angle = angle < 0 ? angle + 2 * Math.PI : angle;
-        return [angle, Math.hypot(x, y)];
-    }
-    const denormalizeFun = (n:number) => 3*n + 4;
-    const normalizeFun = (n:number) => (n-4)/3;
-
-    const emotionsCenterAngles = emotions.map((e) => d3.mean(emotionScale.invertExtent(e)))
-
-    const emotionsCenterPoints = emotionsCenterAngles.map((d) => angleToPoint((d || 0), 1));
-
-    const emotionsRangeAngles = emotionsCenterAngles.map((d) => [
-        (d || 0) - angleOffset,
-        (d || 0) + angleOffset
-    ])
-
-    const emotionsRangePoints = emotionsRangeAngles.map((d) =>
-        d.map((a) => angleToPoint(a, 1))
-    );
+    const [overallPoint, computedEmotion] = calculateOverallEmotion(imageStats);
 
     const base_circle_radius_increment = 0.3;
     const text_radius = 0.52;
 
-    const computedEmotion = emotionScale(pointToAngle(
-        normalizeFun(overallPoint[0]),
-        normalizeFun(overallPoint[1])
-    )[0]);
 
     console.log({imageStats, computedEmotion, overallPoint, emotionsCenterPoints, emotionsRangePoints});
 
