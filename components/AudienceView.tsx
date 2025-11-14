@@ -179,8 +179,6 @@ export default function AudienceView({ room, identifier }: AudienceViewProps) {
   const midPoint = rangeConfig ? Math.round((rangeConfig.min + rangeConfig.max) / 2) : 0
   const selectorColor = currentQuestion.id == 'valence' ? valenceToColor(Number(answer) ?? 0) : 'oklch(62.3% 0.214 259.815)';
   const selectorSize = (currentQuestion.id == 'arousal' && answer) ? arousalToRadius(Number(answer)) * 3 : 20;
-  
-  console.log({selectorColor, answer, currentQuestion, test: currentQuestion.id == 'valence'});
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
