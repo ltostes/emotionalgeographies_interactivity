@@ -1,0 +1,19 @@
+{
+  "type": "single-randomly-picked",
+  "questions": [
+    {
+      "id": "valence",
+      "prompt": "Avalie a imagem em quão positivamente ou negativamente ela faz você se sentir.",
+      "details": "Se a imagem gerar uma sensação positiva, use o lado direito da escala para marcar sua resposta. Sentimentos positivos incluem sentir-se feliz, satisfeito, competente, orgulhoso, contente, encantado e assim por diante. Não importa qual seja o sentimento específico, desde que seja algo positivo.\n\nSe a imagem gerar uma sensação negativa, use o lado esquerdo da escala para marcar sua resposta. Sentimentos negativos incluem sentir-se infeliz, chateado, irritado, com raiva, triste, deprimido e assim por diante. Não importa qual seja o sentimento específico, desde que seja algo negativo.\n\nUse o meio da escala para indicar que a imagem faz você se sentir neutro, ou seja, nem positivo nem negativo.\n\nPor favor, use toda a faixa da escala ao responder, em vez de se limitar a apenas alguns pontos.",
+      "type": "range",
+      "implementation": {"min": 1, "max": 7, "labels": { "1": "Muito Negativo", "7": "Muito Positivo"}}
+    },
+    {
+      "id": "arousal",
+      "prompt": "Avalie a imagem em quão estimulado ou excitado ela faz você se sentir.",
+      "details": "Em outras palavras, gostaríamos de saber quão intensa é a sensação que a imagem evoca; não importa se ela é boa ou ruim.\n\nUse o lado direito da escala para marcar sua resposta se a imagem fizer você se sentir emocionalmente estimulado, alerta, ativado, energizado ou excitado.\n\nUse o lado esquerdo da escala para marcar sua resposta se a imagem não causar nenhuma estimulação emocional, ou seja, se ela fizer você se sentir não estimulado, lento, parado, sem energia, calmo ou em paz.\n\nUse o meio da escala para indicar que você está moderadamente estimulado, isto é, a meio caminho entre os dois extremos.\n\nPor favor, use toda a faixa da escala ao responder, em vez de se limitar a apenas alguns pontos.",
+      "type": "range",
+      "implementation": { "min": 1, "max": 7, "labels": {"1": "Sem estimulação","7": "Altamente estimulado"}}
+    }
+  ]
+}

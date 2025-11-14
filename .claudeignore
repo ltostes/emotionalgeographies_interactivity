@@ -1,0 +1,92 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js build outputs
+.next/
+out/
+build/
+dist/
+
+# Next.js cache
+.next/cache/
+
+# Production bundles
+*.js.map
+*.css.map
+
+# Testing
+coverage/
+.nyc_output/
+*.test.js.snap
+__snapshots__/
+
+# Environment variables (keep .env.example if you have one for reference)
+.env
+.env*.local
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE/Editor directories
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Vercel deployment
+.vercel/
+
+# TypeScript cache (if using TS)
+*.tsbuildinfo
+
+# Public assets (usually don't need to analyze images/fonts)
+public/images/
+public/fonts/
+public/icons/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.woff
+*.woff2
+*.ttf
+*.eot
+
+# Generated Supabase types (unless you frequently modify them)
+# types/supabase.ts
+# supabase/migrations/ (uncomment if you have many migrations and don't need them in context)
+
+# Documentation (include only if actively working on docs)
+*.md
+!README.md  # Keep README for project overview
+
+# Lock files (keep package.json but ignore locks)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Storybook (if using)
+storybook-static/
+
+# Misc
+.turbo/
+*.cache
+.eslintcache
