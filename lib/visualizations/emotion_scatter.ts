@@ -3,7 +3,11 @@ import * as d3 from 'd3'
 import type { ImageStats } from '@/lib/types/database'
 import { valenceToColor, arousalToRadius  } from '@/lib/visualizations/scales'
 
-export function generateScatterPlot(imageStats: ImageStats[], width: number) : [Element, string | null] {
+export function generateScatterPlot(
+    imageStats: ImageStats[],
+    width: number,
+    onDotClick?: (imageStats: ImageStats, event: MouseEvent) => void
+) : [Element, string | null] {
 
     
     const overallPoint = [
@@ -90,7 +94,8 @@ export function generateScatterPlot(imageStats: ImageStats[], width: number) : [
                 y: 'mean_arousal',
                 r: 3,
                 fill: 'hsl(205 76.7% 63.3%)',
-                fillOpacity: 0.5
+                fillOpacity: 0.5,
+                // cursor: 'pointer'
             }),
             Plot.dot([overallPoint], {
                 x: overallPoint[0],
@@ -169,6 +174,22 @@ export function generateScatterPlot(imageStats: ImageStats[], width: number) : [
             }),
         ]
     });
+
+    // Add click handlers to individual dots if callback provided
+    if (onDotClick) {
+        d3.select(plot)
+            .selectAll('circle')
+            .each(function(this: d3.BaseType, d, i) {
+                // Only handle the small dots (imageStats), not the overall point
+                if (i < imageStats.length) {
+                    const el = this as unknown as SVGCircleElement;
+                    el.style.cursor = 'pointer';
+                    el.addEventListener('click', (event: MouseEvent) => {
+                        onDotClick(imageStats[i], event);
+                    });
+                }
+            });
+    }
 
     return [plot, computedEmotion];
 }

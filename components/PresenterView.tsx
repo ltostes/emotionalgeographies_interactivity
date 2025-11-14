@@ -82,7 +82,7 @@ export default function PresenterView({ room }: PresenterViewProps) {
 
         {/* Top-right: Valence/Arousal Scatter Plot */}
         <div className="bg-gray-900 rounded-lg p-4 overflow-hidden flex flex-col items-center justify-center">
-          <ValenceArousalScatter imageStats={imageStats} />
+          <ValenceArousalScatter imageStats={imageStats} config={config} />
         </div>
 
         {/* Bottom-left: Explanation Panel */}

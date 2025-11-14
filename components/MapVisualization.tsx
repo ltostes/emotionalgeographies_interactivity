@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Map, Marker, Popup } from 'react-map-gl/maplibre'
+import { Map, Marker } from 'react-map-gl/maplibre'
 import { motion } from 'motion/react'
 import type { ImageStats, RoomConfig } from '@/lib/types/database'
 import { valenceToColor, arousalToRadius  } from '@/lib/visualizations/scales'
+import ImageTooltip, { type TooltipData } from './ImageTooltip'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 interface MapVisualizationProps {
@@ -26,7 +27,7 @@ interface PhotoLocation {
 
 export default function MapVisualization({ config, imageStats }: MapVisualizationProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
-  const [popupInfo, setPopupInfo] = useState<PhotoLocation | null>(null)
+  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null)
 
   // Extract photo locations from config with lat/lon
   const photoLocations: PhotoLocation[] = config.images
@@ -96,6 +97,22 @@ export default function MapVisualization({ config, imageStats }: MapVisualizatio
     return { radius, color, opacity: 1 }
   }
 
+  const handleMarkerClick = (e: React.MouseEvent, loc: PhotoLocation) => {
+    e.stopPropagation()
+    const rect = (e.target as HTMLElement).getBoundingClientRect()
+    setTooltipData({
+      imageUrl: loc.url,
+      imageId: loc.image_id,
+      contributionCount: loc.contributionCount || 0,
+      meanValence: loc.meanValence,
+      meanArousal: loc.meanArousal,
+      position: {
+        x: rect.left + rect.width / 2,
+        y: rect.top
+      }
+    })
+  }
+
   return (
     <div ref={mapContainerRef} className="w-full h-full relative">
       <Map
@@ -125,9 +142,7 @@ export default function MapVisualization({ config, imageStats }: MapVisualizatio
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.5 }}
                 className="cursor-pointer"
-                onClick={() => setPopupInfo(loc)}
-                onMouseEnter={() => setPopupInfo(loc)}
-                onMouseLeave={() => setPopupInfo(null)}
+                onClick={(e) => handleMarkerClick(e, loc)}
                 style={{
                   width: style.radius * 2,
                   height: style.radius * 2,
@@ -140,57 +155,12 @@ export default function MapVisualization({ config, imageStats }: MapVisualizatio
             </Marker>
           )
         })}
-
-        {popupInfo && (
-          <Popup
-            latitude={popupInfo.latitude}
-            longitude={popupInfo.longitude}
-            anchor="bottom"
-            onClose={() => setPopupInfo(null)}
-            closeButton={false}
-            className="dark-popup"
-          >
-            <div className="p-2 bg-gray-800 text-gray-100 rounded-lg min-w-[200px]">
-              <img
-                src={popupInfo.url}
-                alt={popupInfo.image_id}
-                className="w-full h-24 object-cover rounded mb-2"
-              />
-              <div className="text-xs space-y-1">
-                <div className="font-semibold text-gray-300">
-                  {popupInfo.contributionCount || 0} contribution(s)
-                </div>
-                {popupInfo.meanValence !== undefined && (
-                  <div>
-                    <span className="text-gray-400">Computed Valence:</span>{' '}
-                    <span className="text-white">{popupInfo.meanValence.toFixed(2)}</span>
-                  </div>
-                )}
-                {popupInfo.meanArousal !== undefined && (
-                  <div>
-                    <span className="text-gray-400">Computed Arousal:</span>{' '}
-                    <span className="text-white">{popupInfo.meanArousal.toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="border-t border-gray-600 pt-1 mt-1">
-                  {popupInfo.standardValence !== undefined && (
-                    <div>
-                      <span className="text-gray-500">Standard Valence:</span>{' '}
-                      <span className="text-gray-300">{popupInfo.standardValence.toFixed(2)}</span>
-                    </div>
-                  )}
-                  {popupInfo.standardArousal !== undefined && (
-                    <div>
-                      <span className="text-gray-500">Standard Arousal:</span>{' '}
-                      <span className="text-gray-300">{popupInfo.standardArousal.toFixed(2)}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Popup>
-        )}
       </Map>
+
+      <ImageTooltip
+        data={tooltipData}
+        onClose={() => setTooltipData(null)}
+      />
     </div>
   )
 }
