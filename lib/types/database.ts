@@ -70,7 +70,7 @@ export interface RangeQuestion {
   prompt: string
   details: string
   type: 'range'
-  implementation: [number, number] // [min, max]
+  implementation: [number, number] | { min: number; max: number; labels?: Record<number, string> }
 }
 
 export interface OpenQuestion {

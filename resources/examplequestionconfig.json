@@ -4,16 +4,16 @@
     {
       "id": "valence",
       "prompt": "Please rate the picture in terms of how positive or negative it makes you feel.",
-      "details": "Please rate the picture in terms of how positive or negative it makes you feel. If the picture creates a positive feeling, please use the right side of the scale to mark your answer. Positive feelings include feeling happy, satisfied, competent, proud, contented, delighted, and so on. It doesn’t matter what the specific feeling is, as long as it is something positive. If the picture creates a negative feeling, please use the left side of the scale to mark your answer. Negative feelings include feeling unhappy, upset, irritated, angry, sad, depressed, and so on. It doesn’t matter what the specific feeling is, as long as it is something negative. Use the middle of the scale to indicate that the picture makes you feel neutral, that is, neither positive nor negative. Please use the full range of the scale to make your responses rather than relying on only a few points.",
+      "details": "If the picture creates a positive feeling, please use the right side of the scale to mark your answer. Positive feelings include feeling happy, satisfied, competent, proud, contented, delighted, and so on. It doesn’t matter what the specific feeling is, as long as it is something positive.\n\nIf the picture creates a negative feeling, please use the left side of the scale to mark your answer. Negative feelings include feeling unhappy, upset, irritated, angry, sad, depressed, and so on. It doesn’t matter what the specific feeling is, as long as it is something negative.\n\nUse the middle of the scale to indicate that the picture makes you feel neutral, that is, neither positive nor negative.\n\nPlease use the full range of the scale to make your responses rather than relying on only a few points.",
       "type": "range",
-      "implementation": [1, 7]
+      "implementation": {"min": 1, "max": 7, "labels": {"1": "Very Negative", "7": "Very Positive"}}
     },
     {
       "id": "arousal",
       "prompt": "Please rate the picture in terms of how excited or aroused it makes you feel.",
-      "details": "Please rate the picture in terms of how excited or aroused it makes you feel. In other words, we would like to know how intense the feeling is that the picture evokes; whether it is good or bad doesn’t matter. Use the right side of the scale to mark your answer if the picture makes you feel emotionally aroused, alert, activated, charged, or energized. Use the left side of the scale to mark your answer if the picture makes you feel no emotional arousal at all, that is, if it makes you feel unaroused, slow, still, de-energized, calm, or peaceful. Use the middle of the scale to indicate that you are moderately aroused, that is, halfway through the two extremes. Please use the full range of the scale to make your responses rather than relying on only a few points.",
+      "details": "In other words, we would like to know how intense the feeling is that the picture evokes; whether it is good or bad doesn’t matter.\n\nUse the right side of the scale to mark your answer if the picture makes you feel emotionally aroused, alert, activated, charged, or energized. \n\nUse the left side of the scale to mark your answer if the picture makes you feel no emotional arousal at all, that is, if it makes you feel unaroused, slow, still, de-energized, calm, or peaceful. \n\nUse the middle of the scale to indicate that you are moderately aroused, that is, halfway through the two extremes. \n\nPlease use the full range of the scale to make your responses rather than relying on only a few points.",
       "type": "range",
-      "implementation": [1, 7]
+      "implementation": {"min": 1, "max": 7, "labels": {"1": "No arousal", "7": "Highly Aroused"}}
     }
   ]
 }

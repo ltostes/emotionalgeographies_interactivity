@@ -1,15 +1,9 @@
 import * as Plot from '@observablehq/plot'
 import * as d3 from 'd3'
 import type { ImageStats } from '@/lib/types/database'
+import { valenceToColor, arousalToRadius  } from '@/lib/visualizations/scales'
 
 export function generateScatterPlot(imageStats: ImageStats[], width: number) : [Element, string | null] {
-
-    // Scales for styling the overall point
-    const arousalToRadius = d3.scaleLinear().domain([1, 7]).range([3, 10])
-    const valenceToColor = (valence: number) => {
-      const normalized = (valence - 1) / 6
-      return d3.interpolateRdYlGn(normalized)
-    }
 
     
     const overallPoint = [

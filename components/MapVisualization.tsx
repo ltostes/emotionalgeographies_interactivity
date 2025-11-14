@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Map, Marker, Popup } from 'react-map-gl/maplibre'
-import { scaleLinear } from 'd3-scale'
-import { interpolateRdYlGn } from 'd3-scale-chromatic'
 import { motion } from 'motion/react'
 import type { ImageStats, RoomConfig } from '@/lib/types/database'
+import { valenceToColor, arousalToRadius  } from '@/lib/visualizations/scales'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 interface MapVisualizationProps {
@@ -64,16 +63,6 @@ export default function MapVisualization({ config, imageStats }: MapVisualizatio
 
   const centerLat = (bounds.minLat + bounds.maxLat) / 2
   const centerLon = (bounds.minLon + bounds.maxLon) / 2
-
-  // Scales for styling
-  const arousalToRadius = scaleLinear().domain([1, 7]).range([3, 10])
-
-  // Color scale: valence 1=red (0), 4=blue (0.5), 7=green (1)
-  const valenceToColor = (valence: number) => {
-    // Normalize to 0-1 range, where 1→0, 4→0.5, 7→1
-    const normalized = (valence - 1) / 6
-    return interpolateRdYlGn(normalized)
-  }
 
   const getPointStyle = (loc: PhotoLocation) => {
     const hasValence = loc.meanValence !== undefined

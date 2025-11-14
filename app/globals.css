@@ -14,3 +14,27 @@
 .maplibregl-popup-close-button {
   display: none !important;
 }
+
+/* Minimal styling only for making the thumb resizable */
+.custom-range {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Chrome / Safari */
+.custom-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--thumb-size, 20px);
+  height: var(--thumb-size, 20px);
+  border-radius: 9999px;
+  background: var(--thumb-color, #a78bfa); /* defaults to purple-400 */
+}
+
+/* Firefox */
+.custom-range::-moz-range-thumb {
+  width: var(--thumb-size, 20px);
+  height: var(--thumb-size, 20px);
+  border-radius: 9999px;
+  background: var(--thumb-color, #a78bfa);
+}
